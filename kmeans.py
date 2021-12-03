@@ -1,9 +1,10 @@
+# ID: 20180373 NAME: Kim Hyeonji
+######################################################################################
+
 import os
 import math
-from utils import converged, plot_2d, plot_centroids, read_data, \
-    load_centroids, write_centroids_tofile
+from utils import converged, plot_2d, plot_centroids, read_data, load_centroids, write_centroids_tofile
 import matplotlib.pyplot as plt
-
 
 # problem for students
 def euclidean_distance(dp1, dp2):
@@ -15,8 +16,8 @@ def euclidean_distance(dp1, dp2):
 
     Returns: the Euclidean distance between two data points
     """
-    pass
-
+    
+    return math.dist(dp1, dp2)
 
 # problem for students
 def assign_data(data_point, centroids):
@@ -31,9 +32,14 @@ def assign_data(data_point, centroids):
 
     Returns: a string as the key name of the closest centroid to the data point
     """
-    pass
-
-
+    dist = math.inf
+    for centroid in centroids.items() :
+        dist_centroid = euclidean_distance(data_point, centroid[1])
+        if (dist > dist_centroid) :
+            dist = dist_centroid
+            res_centroid = centroid[0]
+    return res_centroid
+    
 # problem for students
 def update_assignment(data, centroids):
     """Assign all data points to the closest centroids. You should use
@@ -50,9 +56,14 @@ def update_assignment(data, centroids):
              given centroid does not have any data points closest to it,
              do not include the centroid in the returned dictionary.
     """
-    pass
+    assignment_dict = dict()
+    for data_point in data:
+        centroid = assign_data(data_point, centroids)
+        if centroid not in assignment_dict.keys(): 
+            assignment_dict[centroid] = list()
+        assignment_dict[centroid].append(data_point)
+    return assignment_dict
             
-
 # problem for students
 def mean_of_points(data):
     """Calculate the mean of a given group of data points. You should NOT
@@ -63,9 +74,8 @@ def mean_of_points(data):
 
     Returns: a list of floats as the mean of the given data points
     """
-    pass
-
-
+    return [sum(x)/len(x) for x in zip(*data)]
+    
 # problem for students
 def update_centroids(assignment_dict):
     """Update centroid locations as the mean of all data points that belong
@@ -77,7 +87,10 @@ def update_centroids(assignment_dict):
 
     Returns: A new dictionary representing the updated centroids
     """
-    pass
+    centroids = dict()
+    for assignment in assignment_dict.items():
+        centroids[assignment[0]] = mean_of_points(assignment[1])
+    return centroids
 
 def main(data, init_centroids):
     #######################################################

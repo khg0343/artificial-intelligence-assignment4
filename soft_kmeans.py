@@ -1,10 +1,11 @@
+# ID: 20180373 NAME: Kim Hyeonji
+######################################################################################
+
 import os
 import math
 from utils import converged, plot_2d_soft, plot_centroids, read_data, \
     load_centroids, write_centroids_tofile
 import matplotlib.pyplot as plt
-import numpy as np
-
 from kmeans import euclidean_distance
 
 # problem for students
@@ -23,7 +24,15 @@ def get_responsibility(data_point, centroids, beta):
     Returns: a dictionary whose keys are the the centroids' key names and
              value is a float as the responsibility of the cluster for the data point.
     """
-    pass
+    responsibility_dict = dict()
+    sum_responsibility = 0
+    for centroid in centroids.items() :
+        sum_responsibility += math.exp(-beta * euclidean_distance(data_point, centroid[1]))
+        
+    for centroid in centroids.items() :
+        responsibility = math.exp(-beta * euclidean_distance(data_point, centroid[1]))/sum_responsibility 
+        responsibility_dict[centroid[0]] = responsibility
+    return responsibility_dict
 
 
 # problem for students
@@ -42,7 +51,12 @@ def update_soft_assignment(data, centroids, beta):
              (In python, 'list' cannot be the 'key' of 'dict')
              
     """
-    pass
+    
+    soft_assignment_dict = dict()
+    for data_point in data:
+        responsibility_dict = get_responsibility(data_point, centroids, beta)
+        soft_assignment_dict[tuple(data_point)] = responsibility_dict
+    return soft_assignment_dict
             
 
 # problem for students
@@ -56,7 +70,26 @@ def update_centroids(soft_assignment_dict):
 
     Returns: A new dictionary representing the updated centroids
     """
-    pass
+    centroids = dict()
+    sum_responsibility = dict()
+    sum_responsibility_datapoint = dict()
+    
+    for soft_assignment in soft_assignment_dict.items():
+        data_point = soft_assignment[0]
+        for centroid_name, responsibility in soft_assignment[1].items():
+            if centroid_name not in sum_responsibility.keys():
+                sum_responsibility[centroid_name] = responsibility
+            else :
+                sum_responsibility[centroid_name] += responsibility
+            if centroid_name not in sum_responsibility_datapoint.keys():
+                sum_responsibility_datapoint[centroid_name] = tuple([x*responsibility for x in data_point])
+            else : 
+                sum_responsibility_datapoint[centroid_name] = tuple(map(sum, zip(sum_responsibility_datapoint[centroid_name], tuple([x*responsibility for x in data_point])))) 
+    
+    for centroid_name in list(sum_responsibility.keys()):
+        centroids[centroid_name] =[x/sum_responsibility[centroid_name] for x in sum_responsibility_datapoint[centroid_name]]
+        
+    return centroids
 
 def main(data, init_centroids):
     #######################################################
